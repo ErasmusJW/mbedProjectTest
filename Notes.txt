@@ -12,3 +12,6 @@ edit \mbed-os\tools\profiles to ""cxx": ["-std=c++14","  to add c14++ support
 check MBED_BUILD_TIMESTAMP for own clone of mbed how to set stuff
 
 check get_config.py vir config shit - can macros add soos wat hul timestamp doen
+
+
+mbed new .   - is bumping mbed.lib bersion try --create-only option
