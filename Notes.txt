@@ -1,0 +1,14 @@
+arm path
+GCC_ARM_PATH = "C:/Program Files (x86)/GNU Tools ARM Embedded/7 2017-q4-major/bin"
+
+
+mbed compile -t GCC_ARM -m K64F
+mbed compile -t GCC_ARM -m nucleo_f767zi  -c -j 4
+mbed add https://github.com/Zeppelin15/libTest
+
+
+edit \mbed-os\tools\profiles to ""cxx": ["-std=c++14","  to add c14++ support
+
+check MBED_BUILD_TIMESTAMP for own clone of mbed how to set stuff
+
+check get_config.py vir config shit - can macros add soos wat hul timestamp doen

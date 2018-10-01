@@ -1,0 +1,8 @@
+{
+    "target_overrides": {
+        "*": {
+            "libTest.test_value_1": 250,
+            "libTest.test_value_2": 500
+        }
+    }
+}
