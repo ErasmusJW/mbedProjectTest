@@ -33,7 +33,7 @@ int main() {
     radio::ModulationMaping myModulationMaping;
     while (true) {
         led1 = !led1;
-        wait(3.0);
+        wait(9.0);
         // pc.printf(LIBTEST_NOTOVERRIDE);
         // pc.printf("\n\r");
         // pc.printf(LIBTEST_OVERRIDE);
@@ -44,16 +44,36 @@ int main() {
 
         
         pc.printf("\n\r");
-        for (size_t i = 0; i < MBED_CONF_CONSTALATIONDIAGRAMS_NUMBEROFPOINTS +1; i++)
-        {
+        // for (size_t i = 0; i < MBED_CONF_CONSTALATIONDIAGRAMS_NUMBEROFPOINTS +1; i++)
+        // {
 
-            auto val = myModulationMaping.getMappedValue(i);
-            if(val.err == encoding_error::OK)
-              pc.printf("ERR : %i \t\t RE:\t%f  \t\t IM:\t%f  \n\r",val.err ,val.value.real(),val.value.imag() );
-            else
-               pc.printf("ERR : %i ",val.err);
+            uint8_t testValue1 = 0b11011111;
+            uint8_t testValue2 = 0b10101111;
+            uint8_t pInputBuffer[2];
+            uint8_t pOutBuffer[2];
+            
+            pInputBuffer[0] = testValue1;
+            pInputBuffer[1] = testValue2;
+
+            std::complex<float> modulValuse[8];
+
+            std::error_code er = myModulationMaping.ModulateBuffer(pInputBuffer,2,modulValuse,8);
+
+            pc.printf("Modulate Value1 : %i \n\r",testValue1);
+            pc.printf("Modulate Value2 : %i \n\r",testValue2);
+
+
+
+            pc.printf("Modulate Error: %i \n\r",er );
+            
+            std::error_code er2 = myModulationMaping.DemodulateBuffer(modulValuse,8,pOutBuffer,2);
+
+            pc.printf("demoModulate Error: %i \n\r",er2 );
+            pc.printf("De modulate Value1: %i \n\r",pOutBuffer[0] );
+            pc.printf("De modulate Value2: %i \n\r\n\r",pOutBuffer[1] );
+
             // pc.printf("RE : %f  \t\t IMG : %f",myConstalation.m_aConstalationMapping[i].real(),myConstalation.m_aConstalationMapping[i].imag());
-        }
+        // }
  
        // auto cunt = 10; 
     }
