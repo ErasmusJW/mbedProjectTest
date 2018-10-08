@@ -5,7 +5,7 @@
 
 DigitalOut led1(LED1);
 
-// Serial pc(USBTX, USBRX); // tx, rx
+ Serial pc(USBTX, USBRX); // tx, rx
 
 // main() runs in its own thread in the OS
 

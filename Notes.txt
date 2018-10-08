@@ -15,3 +15,4 @@ check get_config.py vir config shit - can macros add soos wat hul timestamp doen
 
 
 mbed new .   - is bumping mbed.lib bersion try --create-only option
+mbed test -t GCC_ARM -m nucleo_f767zi 
