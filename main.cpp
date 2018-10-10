@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include "libTest/libTest.h"
 #include "ConstalationDiagrams/ModulationMaping.h"
-#include "TempGlobals.h"
+
 
 DigitalOut led1(LED1);
 
@@ -56,21 +56,24 @@ int main() {
             pInputBuffer[1] = testValue2;
 
             std::complex<float> modulValuse[8];
-
-            std::error_code er = myModulationMaping.ModulateBuffer(pInputBuffer,2,modulValuse,8);
+            std::error_code er;
+            uint32_t valuesInOutBuf=0; 
+            std::tie(er,valuesInOutBuf)= myModulationMaping.ModulateBuffer(pInputBuffer,2,modulValuse,8);
 
             pc.printf("Modulate Value1 : %i \n\r",testValue1);
             pc.printf("Modulate Value2 : %i \n\r",testValue2);
+            pc.printf("valuesInOutBuf : %i \n\r",valuesInOutBuf);
 
 
 
             pc.printf("Modulate Error: %i \n\r",er );
-            
-            std::error_code er2 = myModulationMaping.DemodulateBuffer(modulValuse,8,pOutBuffer,2);
+              valuesInOutBuf = 0;
+            std::tie(er,valuesInOutBuf)  = myModulationMaping.DemodulateBuffer(modulValuse,8,pOutBuffer,2);
 
-            pc.printf("demoModulate Error: %i \n\r",er2 );
+            pc.printf("demoModulate Error: %i \n\r",er );
             pc.printf("De modulate Value1: %i \n\r",pOutBuffer[0] );
             pc.printf("De modulate Value2: %i \n\r\n\r",pOutBuffer[1] );
+            pc.printf("valuesInOutBuf : %i \n\r",valuesInOutBuf);
 
             // pc.printf("RE : %f  \t\t IMG : %f",myConstalation.m_aConstalationMapping[i].real(),myConstalation.m_aConstalationMapping[i].imag());
         // }

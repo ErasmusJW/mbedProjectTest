@@ -16,3 +16,20 @@ check get_config.py vir config shit - can macros add soos wat hul timestamp doen
 
 mbed new .   - is bumping mbed.lib bersion try --create-only option
 mbed test -t GCC_ARM -m nucleo_f767zi 
+
+mbed test -t GCC_ARM -m nucleo_f767zi 
+
+
+printf() vir messages in test en --v comand flag om messages te sien
+
+TEST_ASSERT_MESSAGE
+
+
+cannot change configs from app config for test thus adding testConfigs file to ConstalationDiagrams folder use --app-config flag
+
+mbedgt --report-html html_report.html om repports te kry hy run all die tests wat hy kry
+
+mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\BPSK.json
+mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\PSK_4.json
+mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\QAM_16.json
+mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\QPSK.json
