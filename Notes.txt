@@ -33,3 +33,6 @@ mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testc
 mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\PSK_4.json
 mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\QAM_16.json
 mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testcase1 --app-config .\ConstalationDiagrams\testConfigs\QPSK.json
+
+analog out PA_4
+analog out PA_5

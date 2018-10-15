@@ -2,8 +2,8 @@
     "target_overrides": {
         "*": {
 
-            "ConstalationDiagrams.NumberOfPoints": 16,
-            "ConstalationDiagrams.modulation": "M_QAM",
+            "ConstalationDiagrams.NumberOfPoints": 4,
+            "ConstalationDiagrams.modulation": "M_PSK",
             "libTest.test_value_1": 250,
             "libTest.test_value_2": 500
         }
