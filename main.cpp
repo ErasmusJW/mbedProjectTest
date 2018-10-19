@@ -1,170 +1,168 @@
-#include "mbed.h"
-#include "libTest/libTest.h"
-#include "ConstalationDiagrams/ModulationMaping.h"
+#include "main.h"
+#include"stm32f7xx_it.h"
 
+void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
+{
+  GPIO_InitTypeDef          GPIO_InitStruct;
+  static DMA_HandleTypeDef  hdma_adc;
 
-DigitalOut led1(LED2);
+  /*##-1- Enable peripherals and GPIO Clocks #################################*/
+  /* ADC1 Periph clock enable */
+  ADCx_CLK_ENABLE();
+  /* Enable GPIO clock ****************************************/
+  ADCx_CHANNEL_GPIO_CLK_ENABLE();
+  /* Enable DMA2 clock */
+  DMAx_CLK_ENABLE();
+
+  /*##-2- Configure peripheral GPIO ##########################################*/
+  /* ADC Channel GPIO pin configuration */
+  GPIO_InitStruct.Pin = ADCx_CHANNEL_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(ADCx_CHANNEL_GPIO_PORT, &GPIO_InitStruct);
+
+  /*##-3- Configure the DMA streams ##########################################*/
+  /* Set the parameters to be configured */
+  hdma_adc.Instance = ADCx_DMA_STREAM;
+
+  hdma_adc.Init.Channel  = ADCx_DMA_CHANNEL;
+  hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+  hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+  hdma_adc.Init.Mode = DMA_CIRCULAR;
+  hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+  hdma_adc.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+  hdma_adc.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+  hdma_adc.Init.MemBurst = DMA_MBURST_SINGLE;
+  hdma_adc.Init.PeriphBurst = DMA_PBURST_SINGLE;
+
+  HAL_DMA_Init(&hdma_adc);
+
+  /* Associate the initialized DMA handle to the ADC handle */
+  __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc);
+
+  /*##-4- Configure the NVIC for DMA #########################################*/
+  /* NVIC configuration for DMA transfer complete interrupt */
+  HAL_NVIC_SetPriority(ADCx_DMA_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(ADCx_DMA_IRQn);
+}
+
+/**
+  * @brief ADC MSP De-Initialization
+  *        This function frees the hardware resources used in this example:
+  *          - Disable the Peripheral's clock
+  *          - Revert GPIO to their default state
+  * @param hadc: ADC handle pointer
+  * @retval None
+  */
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
+{
+
+  /*##-1- Reset peripherals ##################################################*/
+  ADCx_FORCE_RESET();
+  ADCx_RELEASE_RESET();
+
+  /*##-2- Disable peripherals and GPIO Clocks ################################*/
+  /* De-initialize the ADC Channel GPIO pin */
+  HAL_GPIO_DeInit(ADCx_CHANNEL_GPIO_PORT, ADCx_CHANNEL_PIN);
+}
+
 
  Serial pc(USBTX, USBRX); // tx, rx
+ DigitalOut led1(LED1);
+ DigitalOut led2(LED2);
+ DigitalOut led3(LED3);
 
-// main() runs in its own thread in the OS
+ADC_HandleTypeDef    AdcHandle;
 
-
-
-
-AnalogOut   A_out0(PA_4);
-AnalogOut   A_out1(PA_5);
-
-AnalogIn   A_in0(A0);
-AnalogIn   A_in1(A1);
-
-DigitalOut myled(LED1);
-
-DigitalOut pinOut(D15);
-
-// // Create a queue that can hold a maximum of 32 events
-// EventQueue queue(32 * EVENTS_EVENT_SIZE);
-// // Create a thread that'll run the event queue's dispatch function
-// Thread t;
+/* Variable used to get converted value */
+__IO uint32_t uhADCxConvertedValue = 0;
 
 
-float EncodeValue(float val)
-{
-    return((val+1)/2);
-}
 
-float DevodeValue(float val)
-{
-    return((2*val) - 1);
-}
 
 Ticker flipper;
 void flip() {
-    pinOut = !pinOut;
+    led1 = !led1;
 }
 
 Ticker OutTimmer;
 
 
 int main() {
-    pc.baud(115200);
-    // t.start(callback(&queue, &EventQueue::dispatch_forever));
-   
-      std::error_code ec;
-    //server_side_http_handler(ec); 
-   
-    //flipper.attach(&flip, 0.25); // the address of the function to be attached (flip) and the interval (2 seconds)
+  pc.baud(115200);
+  led3 = 1;
+  OutTimmer.attach(&flip,0.5);
+  ADC_ChannelConfTypeDef sConfig;
 
-    OutTimmer.attach_us(&flip,50);
+  AdcHandle.Instance          = ADCx;
+  
+  AdcHandle.Init.ClockPrescaler        = ADC_CLOCKPRESCALER_PCLK_DIV4;
+  AdcHandle.Init.Resolution            = ADC_RESOLUTION_12B;
+  AdcHandle.Init.ScanConvMode          = DISABLE;                       /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
+  AdcHandle.Init.ContinuousConvMode    = ENABLE;                       /* Continuous mode enabled to have continuous conversion  */
+  AdcHandle.Init.DiscontinuousConvMode = DISABLE;                       /* Parameter discarded because sequencer is disabled */
+  AdcHandle.Init.NbrOfDiscConversion   = 0;
+  AdcHandle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;        /* Conversion start trigged at each external event */
+  AdcHandle.Init.ExternalTrigConv      = ADC_EXTERNALTRIGCONV_T1_CC1;
+  AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
+  AdcHandle.Init.NbrOfConversion       = 1;
+  AdcHandle.Init.DMAContinuousRequests = ENABLE;
+  AdcHandle.Init.EOCSelection          = DISABLE;
 
-    uint16_t AnalogVal1 =  0;
-    uint16_t AnalogVal2 = 32768;
 
-    uint8_t testValue = 0;
-    std::complex<float> modulValuse[4];
-
-    std::complex<float> ValuesReceived[4];
-   
-    //const char * ger =  WatseKopIsGerHard();
-    radio::ModulationMaping myModulationMaping;
+  if (HAL_ADC_Init(&AdcHandle) != HAL_OK)
+  {
+    /* ADC initialization Error */
     
-    while (true) 
+    for(size_t i = 0; i < 5; i++)
     {
-
-
-
-        std::error_code er;
-        uint32_t ValuesInOutBuffer = 0;
-        uint32_t ValuesDecoded = 0;
-
-         uint8_t recVal = 0;
-        std::tie(er,ValuesInOutBuffer)= myModulationMaping.ModulateBuffer(&testValue,1,modulValuse,4);
-        
-        for(size_t i = 0 ; i<ValuesInOutBuffer ; ++i)
-        {
-            float Q = modulValuse[i].real();
-            float I = modulValuse[i].imag();
-            A_out0.write(EncodeValue(Q));
-            A_out1.write(EncodeValue(I));
-
-            float QRead = DevodeValue(A_in0.read());
-            float IRead = DevodeValue(A_in1.read());
-
-            ValuesReceived[i] = {QRead,IRead};
-
-            // pc.printf(" Q Sent : %f \t\t  Q recieved : %f  \n\r",Q,QRead);
-            // pc.printf(" I Sent : %f \t\t  I recieved : %f  \n\r\n\r",I,IRead);
-            wait(0.1);
-
-        }
-
-        std::tie(er,ValuesDecoded)  = myModulationMaping.DemodulateBuffer(ValuesReceived,4,&recVal,1);
-        pc.printf("  Sent : %i \t\t   recieved : %i  \n\r",testValue,recVal);
-        wait(0.1);
-
-        testValue++;
-
-
-        //wait(1.5);
-        // uint16_t read0 = A_in0.read_u16();
-        // uint16_t read1 = A_in1.read_u16();
-        //  pc.printf(" loop \n\r\n\r");
-        //  pc.printf(" Val 1 Sent : %i \t\t recieved : %i  \n\r",AnalogVal1,read0);
-        //  pc.printf(" Val 1 Sent : %i \t\t recieved : %i  \n\r\n\r",AnalogVal2,read1);
-
-        // AnalogVal1 += 4096;
-        // AnalogVal2 += 4096;
-
-
-
-        
- 
-        // wait(1.5);
-        // pc.printf(LIBTEST_NOTOVERRIDE);
-        // pc.printf("\n\r");
-        // pc.printf(LIBTEST_OVERRIDE);
-        // pc.printf("\n\r");
-        // pc.printf("%f",MBED_BUILD_TIMESTAMP);
-        // pc.printf("\n\r");
-
-
-        
-        // pc.printf("\n\r");
-        // for (size_t i = 0; i < MBED_CONF_CONSTALATIONDIAGRAMS_NUMBEROFPOINTS +1; i++)
-        // {
-
-            // uint8_t testValue1 = 0b11011111;
-            // uint8_t testValue2 = 0b10101111;
-            // uint8_t pInputBuffer[2];
-            // uint8_t pOutBuffer[2];
-            
-            // pInputBuffer[0] = testValue1;
-            // pInputBuffer[1] = testValue2;
-
-            // std::complex<float> modulValuse[8];
-            // std::error_code er;
-            // uint32_t valuesInOutBuf=0; 
-            // std::tie(er,valuesInOutBuf)= myModulationMaping.ModulateBuffer(pInputBuffer,2,modulValuse,8);
-
-            // pc.printf("Modulate Value1 : %i \n\r",testValue1);
-            // pc.printf("Modulate Value2 : %i \n\r",testValue2);
-            // pc.printf("valuesInOutBuf : %i \n\r",valuesInOutBuf);
-
-
-
-            // pc.printf("Modulate Error: %i \n\r",er );
-            //   valuesInOutBuf = 0;
-            // std::tie(er,valuesInOutBuf)  = myModulationMaping.DemodulateBuffer(modulValuse,4,pOutBuffer,2);
-
-            // pc.printf("demoModulate Error: %i \n\r",er );
-            // pc.printf("De modulate Value1: %i \n\r",pOutBuffer[0] );
-            // pc.printf("De modulate Value2: %i \n\r\n\r",pOutBuffer[1] );
-            // pc.printf("valuesInOutBuf : %i \n\r",valuesInOutBuf);
-
-
+      pc.printf("ADC initialization Error \n\r");
       
- 
-       // auto cunt = 10; 
     }
+    while(1){};
+    
+  }
+
+  sConfig.Channel      = ADC_CHANNEL_10;
+  sConfig.Rank         = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.Offset       = 0;
+
+  if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK)
+  {
+    /* Channel Configuration Error */
+    for(size_t i = 0; i < 5; i++)
+    {
+      pc.printf("Channel Configuration Error\n\r");
+    }
+    while(1){};
+  }
+
+  
+  /*##-3- Start the conversion process #######################################*/
+  if(HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&uhADCxConvertedValue, 1) != HAL_OK)
+  {
+    /* Start Conversation Error */
+    for(size_t i = 0; i < 5; i++)
+    {
+      pc.printf(" /* Start Conversation Error */ \n\r");
+    }
+    while(1){};
+  }
+
+  while (true) 
+  {
+
+
+
+  }
 }
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle)
+{
+  /* Turn LED1 on: Transfer process is correct */
+  led2 = 1;
+}

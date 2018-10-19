@@ -36,3 +36,7 @@ mbed test -t GCC_ARM -m nucleo_f767zi -n constalationdiagrams-tests-group1-testc
 
 analog out PA_4
 analog out PA_5
+
+
+exclude list for search E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32F0,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32F1,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32F2,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32F3,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32F4,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32L0,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32L1,E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM\TARGET_STM32L4
+include list for search E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM
