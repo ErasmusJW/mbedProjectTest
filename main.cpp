@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "libTest/libTest.h"
 #include "ConstalationDiagrams/ModulationMaping.h"
+#include "ADCConstants.h"
 
 
 DigitalOut led1(LED1);
@@ -53,7 +54,7 @@ static void Error_Handler(void);
 static void CPU_CACHE_Enable(void);
 static void DMA_Config(void);
 /* Private functions ---------------------------------------------------------*/
-
+ 
 
 //het hom self promote na global;
 ADC_ChannelConfTypeDef sConfig;
@@ -75,6 +76,14 @@ uint16_t analogOutCount = 0;
 int main() {
     pc.baud(115200);
     pc.printf("Startup \n\r");
+    pc.printf("syscoreclock %i \n\r",SystemCoreClock);
+    pc.printf("HSI_VALUE %i \n\r",HSI_VALUE);
+    pc.printf("HSE_VALUE %i \n\r",HSE_VALUE);
+    pc.printf("ui_maxPeriodPerSampleInMicro %f \n\r",ui_maxPeriodPerSampleInMicro);
+    
+    pc.printf("clockPreScaller %i \n\r",adcConfig.clockPreScaller);
+    pc.printf("numberOfCycles %i \n\r",adcConfig.numberOfCycles);
+    
  
     led1 = 1;
     led2 = 1;

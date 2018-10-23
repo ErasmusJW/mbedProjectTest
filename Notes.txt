@@ -43,3 +43,10 @@ include list for search E:\mBedCli\mbedProjectTest\mbed-os\targets\TARGET_STM
 
 
 dma notes - the chip has a double buffer mode but not implemented in the hal drivers thus can use large normal buffer and check half full full flags
+
+
+dac example https://github.com/sbaconbits/stm32f4_first_look/blob/master/dac_dma.c
+
+sync with front end?
+
+assumin fucking synched
