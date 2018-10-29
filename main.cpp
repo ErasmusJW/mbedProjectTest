@@ -45,12 +45,16 @@ DigitalOut led3(LED3);
 #define DACx_DMA_IRQHandler             DMA1_Stream5_IRQHandler
 
 
+#define SYMBOLS_PERTRANSFER 100
+
+uint8_t DataToTransmit [SYMBOLS_PERTRANSFER] ;
+
 
 
 DAC_HandleTypeDef    DacHandle;
 static DAC_ChannelConfTypeDef DACsConfig;
 //const uint8_t aEscalator8bit[6] = {0x0, 0x33, 0x66, 0x99, 0xCC, 0xFF};
- uint8_t aEscalator8bit[2] = {0x00, 0xFF};
+ 
 __IO uint8_t ubSelectedWavesForm = 1;
 __IO uint8_t ubKeyPressed = SET;
 
@@ -116,8 +120,19 @@ int main() {
     wait(2);
 
 
+    const uint8_t halfway = SYMBOLS_PERTRANSFER/2 +1;
+    const uint8_t incPerHalf = 255/halfway;
+    
+     
+    for (size_t i = 0; i < halfway; i++) //0 - 50
+    {
+       DataToTransmit[i] = i * incPerHalf;
+    }
 
-
+    for (size_t i = halfway; i < SYMBOLS_PERTRANSFER; i++) //51 - 99
+    {
+       DataToTransmit[i] = DataToTransmit[i-1]- incPerHalf;
+    }
 
 
     DacHandle.Instance = DACx;
@@ -165,8 +180,15 @@ int main() {
         if(bPrint)
         {
           bPrint =false;
+         //if (HAL_DAC_Start_DMA(&DacHandle, DACx_CHANNEL, (uint32_t *)aEscalator8bit, 30, DAC_ALIGN_8B_R) != HAL_OK)
+
+
           pc.printf("print ");
           pc.printf("v : %i c : %i \n\r",uhADCxConvertedValue[0],conversionCompleteConter);
+
+
+
+
         }
 
 
@@ -240,7 +262,7 @@ static void DAC_Ch1_EscalatorConfig(void)
   pc.printf(" DAC Channel configuration complete");
 
   /*##-2- Enable DAC selected channel and associated DMA #############################*/
-  if (HAL_DAC_Start_DMA(&DacHandle, DACx_CHANNEL, (uint32_t *)aEscalator8bit, 2, DAC_ALIGN_8B_R) != HAL_OK)
+  if (HAL_DAC_Start_DMA(&DacHandle, DACx_CHANNEL, (uint32_t *)DataToTransmit, SYMBOLS_PERTRANSFER, DAC_ALIGN_8B_R) != HAL_OK)
   {
     /* Start DMA Error */
     led2 = 1;
@@ -299,8 +321,12 @@ extern "C" {
         hdma_dac1.Init.MemInc = DMA_MINC_ENABLE;
         hdma_dac1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         hdma_dac1.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        hdma_dac1.Init.Mode = DMA_CIRCULAR;
+        //hdma_dac1.Init.Mode = DMA_NORMAL;
+               hdma_dac1.Init.Mode = DMA_CIRCULAR;
         hdma_dac1.Init.Priority = DMA_PRIORITY_HIGH;
+
+        //hdma_dac1.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+
 
         HAL_DMA_Init(&hdma_dac1);
 
