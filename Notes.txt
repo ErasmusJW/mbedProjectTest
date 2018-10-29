@@ -50,3 +50,6 @@ dac example https://github.com/sbaconbits/stm32f4_first_look/blob/master/dac_dma
 sync with front end?
 
 assumin fucking synched
+
+
+TIMER 6 is used by mbed I think

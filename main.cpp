@@ -49,7 +49,8 @@ DigitalOut led3(LED3);
 
 DAC_HandleTypeDef    DacHandle;
 static DAC_ChannelConfTypeDef DACsConfig;
-const uint8_t aEscalator8bit[6] = {0x0, 0x33, 0x66, 0x99, 0xCC, 0xFF};
+//const uint8_t aEscalator8bit[6] = {0x0, 0x33, 0x66, 0x99, 0xCC, 0xFF};
+ uint8_t aEscalator8bit[2] = {0x00, 0xFF};
 __IO uint8_t ubSelectedWavesForm = 1;
 __IO uint8_t ubKeyPressed = SET;
 
@@ -152,7 +153,7 @@ int main() {
     {
          //pc.printf("poes ");
         //A_out0.write_u16(analogOutCount);
-        analogOutCount += 2048;
+        analogOutCount += 270;
         if (transferErrorDetected == 1)
         {
           /* Turn LED2 on*/
@@ -184,8 +185,12 @@ void TIM6_Config(void)
   /*##-1- Configure the TIM peripheral #######################################*/
   /* Time base configuration */
   htim.Instance = TIM7;
+    // 2700 40 khz
 
-  htim.Init.Period            = 0x7FF;
+  //(freq / 2) = desiredfreqeny ( x)
+    // x = 108 000 000 / desired freqenxy
+
+  htim.Init.Period            = 2700;
   htim.Init.Prescaler         = 0;
   htim.Init.ClockDivision     = 0;
   htim.Init.CounterMode       = TIM_COUNTERMODE_UP;
@@ -235,7 +240,7 @@ static void DAC_Ch1_EscalatorConfig(void)
   pc.printf(" DAC Channel configuration complete");
 
   /*##-2- Enable DAC selected channel and associated DMA #############################*/
-  if (HAL_DAC_Start_DMA(&DacHandle, DACx_CHANNEL, (uint32_t *)aEscalator8bit, 6, DAC_ALIGN_8B_R) != HAL_OK)
+  if (HAL_DAC_Start_DMA(&DacHandle, DACx_CHANNEL, (uint32_t *)aEscalator8bit, 2, DAC_ALIGN_8B_R) != HAL_OK)
   {
     /* Start DMA Error */
     led2 = 1;
