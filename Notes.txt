@@ -6,7 +6,9 @@ mbed compile -t GCC_ARM -m K64F
 mbed compile -t GCC_ARM -m nucleo_f767zi  -c -j 4
 mbed add https://github.com/Zeppelin15/libTest
 
-
+//list compile options and macros
+mbed compile -t GCC_ARM -m nucleo_f767zi --config  
+ 
 edit \mbed-os\tools\profiles to ""cxx": ["-std=c++14","  to add c14++ support
 
 check MBED_BUILD_TIMESTAMP for own clone of mbed how to set stuff
@@ -52,4 +54,4 @@ sync with front end?
 assumin fucking synched
 
 
-TIMER 6 is used by mbed I think
+Sending the same buffer while it's still sending causes a full transfer period block
